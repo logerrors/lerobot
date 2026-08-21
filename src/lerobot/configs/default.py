@@ -104,6 +104,18 @@ class WandBConfig:
 
 
 @dataclass
+class SwanLabConfig:
+    enable: bool = False
+    # Set to true to disable uploading policy checkpoint files despite training.save_checkpoint=True
+    disable_artifact: bool = False
+    project: str = "lerobot"
+    entity: str | None = None  # SwanLab workspace (username or team name)
+    notes: str | None = None
+    run_id: str | None = None
+    mode: str | None = None  # Allowed values: 'online', 'offline', 'local', 'disabled'. Defaults to 'online'
+
+
+@dataclass
 class EvalConfig:
     n_episodes: int = 50
     # `batch_size` specifies the number of environments to use in a gym.vector.VectorEnv.

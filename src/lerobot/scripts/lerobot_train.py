@@ -57,6 +57,7 @@ from lerobot.common.train_utils import (
     should_save_checkpoint,
     update_last_checkpoint,
 )
+from lerobot.common.swanlab_utils import SwanLabLogger
 from lerobot.common.wandb_utils import WandBLogger
 from lerobot.configs import JobConfig, parser
 from lerobot.configs.train import TrainPipelineConfig
@@ -427,6 +428,11 @@ def train(cfg: TrainPipelineConfig):
         if is_main_process():
             logging.info(colored("Logs will be saved locally.", "yellow", attrs=["bold"]))
 
+    if cfg.swanlab.enable and cfg.swanlab.project and is_main_process():
+        swanlab_logger = SwanLabLogger(cfg)
+    else:
+        swanlab_logger = None
+
     if cfg.seed is not None:
         set_seed(cfg.seed, accelerator=accelerator)
 
@@ -780,6 +786,17 @@ def train(cfg: TrainPipelineConfig):
                         wandb_log_dict["ema/decay"] = ema.cur_decay_value
                         wandb_log_dict["ema/step"] = ema.optimization_step
                     wandb_logger.log_dict(wandb_log_dict, step)
+                if swanlab_logger:
+                    swanlab_log_dict = train_tracker.to_dict()
+                    if sample_weighter is not None:
+                        weighter_stats = sample_weighter.get_stats()
+                        swanlab_log_dict.update(
+                            {f"sample_weighting/{k}": v for k, v in weighter_stats.items()}
+                        )
+                    if ema is not None and ema.cur_decay_value is not None:
+                        swanlab_log_dict["ema/decay"] = ema.cur_decay_value
+                        swanlab_log_dict["ema/step"] = ema.optimization_step
+                    swanlab_logger.log_dict(swanlab_log_dict, step)
             train_tracker.reset_averages()
 
         if is_eval_step:
@@ -803,6 +820,8 @@ def train(cfg: TrainPipelineConfig):
                 logging.info(f"step {step}: eval_loss={eval_loss:.4f}")
                 if wandb_logger:
                     wandb_logger.log_dict({"eval_loss": eval_loss}, step=step, mode="eval")
+                if swanlab_logger:
+                    swanlab_logger.log_dict({"eval_loss": eval_loss}, step=step, mode="eval")
 
         if cfg.save_checkpoint and is_saving_step:
             # Collective: every rank participates (gathers / DCP shard writes); rank-0-only file
@@ -842,6 +861,8 @@ def train(cfg: TrainPipelineConfig):
                     )
                 if wandb_logger:
                     wandb_logger.log_policy(checkpoint_dir)
+                if swanlab_logger:
+                    swanlab_logger.log_policy(checkpoint_dir)
             accelerator.wait_for_everyone()
 
         if cfg.env and is_env_eval_step:
@@ -898,6 +919,10 @@ def train(cfg: TrainPipelineConfig):
                     wandb_log_dict = {**eval_tracker.to_dict(), **eval_info}
                     wandb_logger.log_dict(wandb_log_dict, step, mode="eval")
                     wandb_logger.log_video(eval_info["overall"]["video_paths"][0], step, mode="eval")
+                if swanlab_logger:
+                    swanlab_log_dict = {**eval_tracker.to_dict(), **eval_info}
+                    swanlab_logger.log_dict(swanlab_log_dict, step, mode="eval")
+                    swanlab_logger.log_video(eval_info["overall"]["video_paths"][0], step, mode="eval")
 
             accelerator.wait_for_everyone()
 

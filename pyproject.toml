@@ -118,6 +118,8 @@ training = [
     "wandb>=0.24.0,<0.28.0",
     "lerobot[accelerate-dep]",
 ]
+# Optional SwanLab experiment tracking (alternative to WandB, enabled via --swanlab.enable=true)
+swanlab = ["swanlab>=0.4.0,<1.0.0"]
 hardware = [
     "lerobot[pynput-dep]",
     "lerobot[pyserial-dep]",
