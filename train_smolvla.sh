@@ -6,8 +6,9 @@ set -e
 # 第三个 camera3 由 empty_cameras=1 自动补空图。
 
 export dataset="wux345/lerobot260823"
+export outputdir=""
 
-lerobot-train \
+HF_ENDPOINT=https://hf-mirror.com lerobot-train \
   --policy.path=lerobot/smolvla_base \
   --dataset.repo_id=${dataset} \
   --dataset.streaming=false \
