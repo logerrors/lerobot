@@ -8,7 +8,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 lerobot-train \
   --policy.type=pi0 \
   --policy.pretrained_path=lerobot/pi0_base \
-  --dataset.repo_id=wux345/lerobot260821-night \
+  --dataset.repo_id=wux345/lerobot260823 \
   --dataset.streaming=false \
   --policy.empty_cameras=1 \
   --output_dir=/autodl-fs/data/lerobot/output_lerobot_train/grab_cube/pi0 \

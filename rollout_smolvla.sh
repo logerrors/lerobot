@@ -8,7 +8,7 @@ source "$ENV_FILE"
 [ -n "${FOLLOWER_PORT:-}" ] || { echo "错误:$ENV_FILE 中未设置 FOLLOWER_PORT" >&2; exit 1; }
 
 # 训练产出的最新 checkpoint(push_to_hub=false,所以用本地路径)
-POLICY_PATH=/home/xing/bypy/pretrained_model
+POLICY_PATH=/home/xing/bypy/0823/pretrained_model
 
 lerobot-rollout \
     --strategy.type=base \
