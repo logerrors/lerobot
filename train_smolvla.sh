@@ -9,7 +9,7 @@ set -e
 # 显存有余量可再试 64);num_workers=8 匹配 16 vCPU 的视频解码供给。
 
 export dataset="wux345/lerobot260823"
-export outputdir=""
+export outputdir="/root/autodl-fs/lerobot/output_lerobot_train/grab_cube/smolvla/"
 
 HF_ENDPOINT=https://hf-mirror.com lerobot-train \
   --policy.path=lerobot/smolvla_base \
